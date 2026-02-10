@@ -1,0 +1,84 @@
+name: Update AUR Package
+
+on:
+  schedule:
+    - cron: '0 8 * * *' # Check daily at 8am UTC
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  update-aur:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    container: 
+      image: archlinux:base-devel
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+    
+      - name: Install Dependencies
+        run: |
+          pacman -Syu --noconfirm git openssh python
+
+      - name: Check and Update PKGBUILD
+        id: check
+        run: |
+          python update_ver.py
+
+      - name: Generate .SRCINFO
+        if: steps.check.outputs.updated == 'true'
+        working-directory: aur
+        run: |
+          # makepkg cannot run as root, so we create a builder user
+          useradd builder -m
+          chown -R builder:builder .
+          
+          # Generate SRCINFO using the builder user
+          su builder -c "makepkg --printsrcinfo" > .SRCINFO
+          
+          # Ensure workspace is safe for git operations (owned by root again)
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Commit and Push to GitHub
+        if: steps.check.outputs.updated == 'true'
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          
+          git add aur/PKGBUILD aur/.SRCINFO
+          git commit -m "Update to ${{ steps.check.outputs.version }}"
+          
+          # Push to GitHub
+          git push
+
+      - name: Push to AUR
+        if: steps.check.outputs.updated == 'true'
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.AUR_SSH_PRIVATE_KEY }}" > ~/.ssh/aur
+          chmod 600 ~/.ssh/aur
+          
+          # Securely add AUR host key
+          ssh-keyscan aur.archlinux.org >> ~/.ssh/known_hosts
+          
+          cat <<EOF >> ~/.ssh/config
+          Host aur.archlinux.org
+            IdentityFile ~/.ssh/aur
+            User aur
+          EOF
+          
+          # Clone AUR repo to a temp dir
+          git clone "ssh://aur@aur.archlinux.org/lark-bin.git" aur-repo
+          
+          # Copy updated files to AUR repo
+          cp aur/PKGBUILD aur/.SRCINFO aur/dlagent-lark.sh aur-repo/
+          
+          # Push from AUR repo
+          cd aur-repo
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git add .
+          git commit -m "Update to ${{ steps.check.outputs.version }}"
+          git push
