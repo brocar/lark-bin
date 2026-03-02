@@ -15,15 +15,29 @@ import os
 PKGBUILD_PATH = "PKGBUILD"
 
 # API Endpoints
-# Platform 10 = Linux x64, 11 = Linux arm64
+# Platform 10 = Linux x64 DEB, 12 = Linux arm64 DEB
 URL_X64 = "https://www.larksuite.com/api/package_info?platform=10"
-URL_ARM64 = "https://www.larksuite.com/api/package_info?platform=11"
+URL_ARM64 = "https://www.larksuite.com/api/package_info?platform=12"
 
-def get_pkg_info(api_url):
+# Expected version_number prefixes to verify the correct platform is returned
+EXPECTED_PREFIX_X64 = "Linux-x64-deb"
+EXPECTED_PREFIX_ARM64 = "Linux-arm64-deb"
+
+def get_pkg_info(api_url, expected_prefix=None):
     """Fetch version and download link from Lark API."""
     with urllib.request.urlopen(api_url) as response:
         data = json.loads(response.read().decode())
-        return data.get("version_number"), data.get("download_link")
+        pkg = data.get("data", {})
+        raw_ver = pkg.get("version_number", "")
+        # version_number is like "Linux-x64-deb@V7.59.12" — extract semver only
+        match = re.search(r'@V([\d.]+)$', raw_ver)
+        version = match.group(1) if match else None
+        if expected_prefix and not raw_ver.startswith(expected_prefix):
+            print(f"Warning: Platform ID may have changed! Expected prefix '{expected_prefix}', "
+                  f"but got '{raw_ver}' from {api_url}")
+            print("Update URL_X64 / URL_ARM64 constants with the correct platform IDs.")
+            sys.exit(1)
+        return version, pkg.get("download_link")
 
 def get_sha256(url):
     """Download a file and calculate its SHA256 hash."""
@@ -87,11 +101,15 @@ def update_pkgbuild(new_ver, sum_x64, sum_arm64):
 if __name__ == "__main__":
     try:
         print("Checking for Lark updates...")
-        ver_x64, link_x64 = get_pkg_info(URL_X64)
-        ver_arm64, link_arm64 = get_pkg_info(URL_ARM64)
+        ver_x64, link_x64 = get_pkg_info(URL_X64, EXPECTED_PREFIX_X64)
+        ver_arm64, link_arm64 = get_pkg_info(URL_ARM64, EXPECTED_PREFIX_ARM64)
         
         print(f"Latest version - x64: {ver_x64}, arm64: {ver_arm64}")
-        
+
+        if ver_x64 is None or link_x64 is None or ver_arm64 is None or link_arm64 is None:
+            print("Error: Failed to retrieve version or download link from API.")
+            sys.exit(1)
+
         if ver_x64 != ver_arm64:
             print(f"Warning: Versions differ! x64: {ver_x64}, arm64: {ver_arm64}. Using x64.")
         
