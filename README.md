@@ -9,11 +9,9 @@ This repository contains the AUR package for Lark Suite with automated daily ver
 ├── .github/
 │   └── workflows/
 │       └── aur-update.yml          # GitHub Actions workflow
-├── aur/                            # AUR package files
-│   ├── PKGBUILD
-│   ├── .SRCINFO
-│   ├── dlagent-lark.sh
-│   └── lark-bin.install
+├── .SRCINFO                        # AUR source info (auto-generated)
+├── PKGBUILD                        # AUR package build script
+├── dlagent-lark.sh                 # Custom DLAGENT for Lark API downloads
 └── update_ver.py                   # Version checker script
 ```
 
@@ -73,11 +71,10 @@ To manually check for updates and update the package:
 python update_ver.py
 
 # Generate .SRCINFO
-cd aur
 makepkg --printsrcinfo > .SRCINFO
 
 # Commit and push
-git add aur/PKGBUILD aur/.SRCINFO
+git add PKGBUILD .SRCINFO
 git commit -m "Update to version X.Y.Z"
 git push
 ```
