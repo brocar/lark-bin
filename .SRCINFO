@@ -1,0 +1,24 @@
+pkgbase = lark-bin
+	pkgdesc = Linux client of Lark Suite from Bytedance (European version of Feishu).
+	pkgver = 7.59.12
+	pkgrel = 1
+	url = https://www.larksuite.com/
+	install = lark-bin.install
+	arch = x86_64
+	arch = aarch64
+	license = unknown
+	makedepends = curl
+	depends = ca-certificates
+	depends = gtk3
+	depends = nss
+	depends = xdg-utils
+	provides = lark
+	conflicts = lark
+	options = !strip
+	options = !emptydirs
+	source_x86_64 = Lark-linux_x64-7.59.12.deb::https://www.larksuite.com/api/package_info?platform=10
+	sha256sums_x86_64 = 39ae6d0a7da5e3327369fce8c4b7c06555eed335882cabfe0de589b1046c66d2
+	source_aarch64 = Lark-linux_arm64-7.59.12.deb::https://www.larksuite.com/api/package_info?platform=11
+	sha256sums_aarch64 = ab6ec37b47ec790123dc2f57efb679b3c1544b15c9ee098f6c5cb5d14687dd27
+
+pkgname = lark-bin

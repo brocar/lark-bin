@@ -12,7 +12,7 @@ import urllib.request
 import json
 import os
 
-PKGBUILD_PATH = "aur/PKGBUILD"
+PKGBUILD_PATH = "PKGBUILD"
 
 # API Endpoints
 # Platform 10 = Linux x64, 11 = Linux arm64
@@ -53,7 +53,8 @@ def update_pkgbuild(new_ver, sum_x64, sum_arm64):
     if current_ver == new_ver:
         print(f"Version {new_ver} is already up to date.")
         # Output for GitHub Actions
-        print("::set-output name=updated::false")
+        with open(os.environ.get("GITHUB_OUTPUT", os.devnull), "a") as f:
+            f.write("updated=false\n")
         return
 
     print(f"Update found: {current_ver} -> {new_ver}")
@@ -79,8 +80,9 @@ def update_pkgbuild(new_ver, sum_x64, sum_arm64):
         f.write(content)
     
     print("PKGBUILD updated successfully.")
-    print(f"::set-output name=updated::true")
-    print(f"::set-output name=version::{new_ver}")
+    with open(os.environ.get("GITHUB_OUTPUT", os.devnull), "a") as f:
+        f.write("updated=true\n")
+        f.write(f"version={new_ver}\n")
 
 if __name__ == "__main__":
     try:
@@ -98,7 +100,8 @@ if __name__ == "__main__":
             with open(PKGBUILD_PATH, "r") as f:
                 if f"pkgver={ver_x64}" in f.read():
                     print(f"Version {ver_x64} is already up to date.")
-                    print("::set-output name=updated::false")
+                    with open(os.environ.get("GITHUB_OUTPUT", os.devnull), "a") as f:
+                        f.write("updated=false\n")
                     sys.exit(0)
         else:
             print(f"Error: PKGBUILD not found at {PKGBUILD_PATH}")

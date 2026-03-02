@@ -29,7 +29,6 @@ jobs:
 
       - name: Generate .SRCINFO
         if: steps.check.outputs.updated == 'true'
-        working-directory: aur
         run: |
           # makepkg cannot run as root, so we create a builder user
           useradd builder -m
@@ -47,7 +46,7 @@ jobs:
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
           
-          git add aur/PKGBUILD aur/.SRCINFO
+          git add PKGBUILD .SRCINFO
           git commit -m "Update to ${{ steps.check.outputs.version }}"
           
           # Push to GitHub
@@ -73,7 +72,7 @@ jobs:
           git clone "ssh://aur@aur.archlinux.org/lark-bin.git" aur-repo
           
           # Copy updated files to AUR repo
-          cp aur/PKGBUILD aur/.SRCINFO aur/dlagent-lark.sh aur-repo/
+          cp PKGBUILD .SRCINFO dlagent-lark.sh aur-repo/
           
           # Push from AUR repo
           cd aur-repo
