@@ -2,7 +2,7 @@ name: Update AUR Package
 
 on:
   schedule:
-    - cron: '0 8 * * *' # Check daily at 8am UTC
+    - cron: '0 4 * * *' # Check daily at 4am UTC
   workflow_dispatch: # Allow manual trigger
 
 jobs:
@@ -16,7 +16,7 @@ jobs:
     
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.2
     
       - name: Install Dependencies
         run: |
@@ -49,35 +49,8 @@ jobs:
           git add PKGBUILD .SRCINFO
           git commit -m "Update to ${{ steps.check.outputs.version }}"
           
-          # Push to GitHub
-          git push
-
-      - name: Push to AUR
-        if: steps.check.outputs.updated == 'true'
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.AUR_SSH_PRIVATE_KEY }}" > ~/.ssh/aur
-          chmod 600 ~/.ssh/aur
+          # Tag the commit with the version
+          git tag "v${{ steps.check.outputs.version }}"
           
-          # Securely add AUR host key
-          ssh-keyscan aur.archlinux.org >> ~/.ssh/known_hosts
-          
-          cat <<EOF >> ~/.ssh/config
-          Host aur.archlinux.org
-            IdentityFile ~/.ssh/aur
-            User aur
-          EOF
-          
-          # Clone AUR repo to a temp dir
-          git clone "ssh://aur@aur.archlinux.org/lark-bin.git" aur-repo
-          
-          # Copy updated files to AUR repo
-          cp PKGBUILD .SRCINFO dlagent-lark.sh aur-repo/
-          
-          # Push from AUR repo
-          cd aur-repo
-          git config --global user.name "GitHub Action"
-          git config --global user.email "action@github.com"
-          git add .
-          git commit -m "Update to ${{ steps.check.outputs.version }}"
-          git push
+          # Push to GitHub with tags
+          git push --follow-tags
