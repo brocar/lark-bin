@@ -36,13 +36,11 @@ jobs:
           
           # Generate SRCINFO using the builder user
           su builder -c "makepkg --printsrcinfo" > .SRCINFO
-          
-          # Ensure workspace is safe for git operations (owned by root again)
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Commit and Push to GitHub
         if: steps.check.outputs.updated == 'true'
         run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
           
