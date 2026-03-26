@@ -30,16 +30,21 @@ jobs:
       - name: Generate .SRCINFO
         if: steps.check.outputs.updated == 'true'
         run: |
-          # makepkg cannot run as root, so we create a builder user
-          useradd builder -m
+          # makepkg cannot run as root, so create a builder user
+          useradd builder -m || true
           
-          # Generate SRCINFO using the builder user (no ownership changes needed)
-          su builder -c "cd $GITHUB_WORKSPACE && makepkg --printsrcinfo" > $GITHUB_WORKSPACE/.SRCINFO
+          # Copy PKGBUILD to a builder-owned temp dir (makepkg needs a writable working area)
+          mkdir -p /tmp/srcinfo
+          cp "$GITHUB_WORKSPACE/PKGBUILD" /tmp/srcinfo/
+          chown -R builder:builder /tmp/srcinfo
+          
+          su builder -c "cd /tmp/srcinfo && makepkg --printsrcinfo" > "$GITHUB_WORKSPACE/.SRCINFO"
 
       - name: Commit and Push to GitHub
         if: steps.check.outputs.updated == 'true'
         run: |
           cd "$GITHUB_WORKSPACE"
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
