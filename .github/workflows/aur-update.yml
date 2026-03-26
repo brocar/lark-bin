@@ -32,18 +32,15 @@ jobs:
         run: |
           # makepkg cannot run as root, so we create a builder user
           useradd builder -m
-          chown -R builder:builder .
           
-          # Generate SRCINFO using the builder user
-          su builder -c "makepkg --printsrcinfo" > .SRCINFO
-          
-          # Restore ownership so git commands work in next step
-          chown -R root:root .
+          # Generate SRCINFO using the builder user (no ownership changes needed)
+          su builder -c "cd $GITHUB_WORKSPACE && makepkg --printsrcinfo" > $GITHUB_WORKSPACE/.SRCINFO
 
       - name: Commit and Push to GitHub
         if: steps.check.outputs.updated == 'true'
         run: |
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          cd "$GITHUB_WORKSPACE"
+          
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
           
