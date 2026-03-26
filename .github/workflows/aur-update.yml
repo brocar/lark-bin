@@ -36,6 +36,9 @@ jobs:
           
           # Generate SRCINFO using the builder user
           su builder -c "makepkg --printsrcinfo" > .SRCINFO
+          
+          # Restore ownership so git commands work in next step
+          chown -R root:root .
 
       - name: Commit and Push to GitHub
         if: steps.check.outputs.updated == 'true'
