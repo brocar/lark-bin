@@ -1,4 +1,4 @@
-name: Update AUR Package
+name: Auto. update version
 
 on:
   schedule:
@@ -28,27 +28,27 @@ jobs:
       - name: Check and Update PKGBUILD
         id: check
         run: |
-          python -u update_ver.py
+          python -u .github/workflows/scripts/update_ver.py
 
       - name: Generate .SRCINFO
         if: steps.check.outputs.updated == 'true'
         run: |
-          # makepkg cannot run as root, so create a builder user
+          # `makepkg` cannot run as root. Create builder and own the workspace to it
           useradd builder -m || true
+          chown -R builder:builder "$GITHUB_WORKSPACE"       
           
-          # Copy PKGBUILD to a builder-owned temp dir (makepkg needs a writable working area)
-          mkdir -p /tmp/srcinfo
-          cp "$GITHUB_WORKSPACE/PKGBUILD" /tmp/srcinfo/
-          chown -R builder:builder /tmp/srcinfo
-          
-          su builder -c "cd /tmp/srcinfo && makepkg --printsrcinfo" > "$GITHUB_WORKSPACE/.SRCINFO"
+          # Update .SRCINFO
+          su builder -c "cd $GITHUB_WORKSPACE && makepkg --printsrcinfo > .SRCINFO"
+
+          # Build package
+          su builder -c "cd $GITHUB_WORKSPACE && makepkg -s --noconfirm"
+
+          # Restore ownership
+          chown -R $USER:$USER "$GITHUB_WORKSPACE"
 
       - name: Prepare for Commit
         if: steps.check.outputs.updated == 'true'
         run: |
-          # Restore ownership
-          chown -R $USER:$USER "$GITHUB_WORKSPACE"
-
           # Mark the repository as safe for git operations
           git config --system --add safe.directory $GITHUB_WORKSPACE
 

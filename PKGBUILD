@@ -4,15 +4,16 @@ pkgname=lark-bin
 pkgver=7.62.9
 _pkgtyp=stable
 pkgrel=1
-pkgdesc="Linux client of Lark Suite from Bytedance (European version of Feishu)."
+pkgdesc="Linux client of Lark (Feishu) from Bytedance."
 arch=('x86_64' 'aarch64')
 url="https://www.larksuite.com/"
-license=('custom:Commercial')
+license=('unknown')
 depends=('alsa-lib' 'ca-certificates' 'gtk3' 'libappindicator-gtk3' 'libglvnd' 'nss' 'xdg-utils')
 makedepends=('curl')
 conflicts=('lark' 'larksuite-bin')
-provides=('lark')
+provides=('lark' 'bytedance-lark')
 options=('!strip' '!emptydirs')
+install=lark-bin.install
 source_x86_64=(Lark-linux_x64-${pkgver}.deb::https://www.larksuite.com/api/package_info?platform=10)
 source_aarch64=(Lark-linux_arm64-${pkgver}.deb::https://www.larksuite.com/api/package_info?platform=11)
 DLAGENTS=("https::/usr/bin/bash ${startdir}/dlagent.sh %o %u")
