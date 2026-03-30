@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Check for build dependencies
-pacman -Qi git base-devel > /dev/null
+# Install build dependencies
+sudo pacman -S --needed git base-devel
 
 # Update the repository and build the package
 git pull

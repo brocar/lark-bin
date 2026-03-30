@@ -17,15 +17,11 @@ Lark is the international (non‑China) version of Feishu, a ByteDance product.
 
 This is the “manual AUR” method: you clone the packaging files and build/install the package locally.
 
-1. Install the basic build tools:
-   ```bash
-   sudo pacman -S --needed git base-devel
-   ```
-2. Clone this repository and install:
+Clone this repository and install:
    ```bash
    git clone <repo-url>
    cd <repo-folder>
-   makepkg -si
+   ./install.sh
    ```
 
 ## Update (from this git repo)
