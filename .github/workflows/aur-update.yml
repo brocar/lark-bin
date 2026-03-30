@@ -1,0 +1,60 @@
+name: Update AUR Package
+
+on:
+  schedule:
+    - cron: '0 4 * * *' # Check daily at 4am UTC
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  update-aur:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    container: 
+      image: archlinux:base-devel
+
+    steps:
+      - name: Install Dependencies
+        run: |
+          pacman -Syu --noconfirm git python
+
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+          persist-credentials: true
+
+      - name: Check and Update PKGBUILD
+        id: check
+        run: |
+          python -u update_ver.py
+
+      - name: Generate .SRCINFO
+        if: steps.check.outputs.updated == 'true'
+        run: |
+          # makepkg cannot run as root, so create a builder user
+          useradd builder -m || true
+          
+          # Copy PKGBUILD to a builder-owned temp dir (makepkg needs a writable working area)
+          mkdir -p /tmp/srcinfo
+          cp "$GITHUB_WORKSPACE/PKGBUILD" /tmp/srcinfo/
+          chown -R builder:builder /tmp/srcinfo
+          
+          su builder -c "cd /tmp/srcinfo && makepkg --printsrcinfo" > "$GITHUB_WORKSPACE/.SRCINFO"
+
+      - name: Prepare for Commit
+        if: steps.check.outputs.updated == 'true'
+        run: |
+          # Restore ownership
+          chown -R $USER:$USER "$GITHUB_WORKSPACE"
+
+          # Mark the repository as safe for git operations
+          git config --system --add safe.directory $GITHUB_WORKSPACE
+
+      - uses: stefanzweifel/git-auto-commit-action@v7
+        if: steps.check.outputs.updated == 'true'
+        with:
+          commit_message: "Update to ${{ steps.check.outputs.version }}"
+          tag_name: "v${{ steps.check.outputs.version }}"
+          file_pattern: "PKGBUILD .SRCINFO"

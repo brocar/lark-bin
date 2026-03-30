@@ -1,0 +1,16 @@
+# Build artifacts
+*.pkg.tar.*
+*.log
+
+# Downloaded sources
+*.deb
+
+# Build directories
+src/
+pkg/
+
+# Temporary files
+*~
+*.swp
+*.swo
+*.part
