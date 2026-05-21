@@ -33,15 +33,19 @@ jobs:
       - name: Generate .SRCINFO
         if: steps.check.outputs.updated == 'true'
         run: |
+          # Install build dependencies as root
+          source PKGBUILD
+          pacman -S --noconfirm --needed ${depends[@]} ${makedepends[@]}
+
           # `makepkg` cannot run as root. Create builder and own the workspace to it
           useradd builder -m || true
-          chown -R builder:builder "$GITHUB_WORKSPACE"       
-          
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+
           # Update .SRCINFO
           su builder -c "cd $GITHUB_WORKSPACE && makepkg --printsrcinfo > .SRCINFO"
 
           # Build package
-          su builder -c "cd $GITHUB_WORKSPACE && makepkg -s --noconfirm"
+          su builder -c "cd $GITHUB_WORKSPACE && makepkg --noconfirm"
 
           # Restore ownership
           chown -R $USER:$USER "$GITHUB_WORKSPACE"
