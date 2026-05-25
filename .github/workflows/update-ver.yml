@@ -22,7 +22,7 @@ jobs:
 
       - uses: actions/checkout@v6
         with:
-          ref: ${{ github.head_ref | github.ref }}
+          ref: ${{ github.head_ref || github.ref }}
           persist-credentials: true
 
       - name: Check and Update PKGBUILD
@@ -33,8 +33,9 @@ jobs:
       - name: Generate .SRCINFO
         if: steps.check.outputs.updated == 'true'
         run: |
+          cd "$GITHUB_WORKSPACE"
           # Install build dependencies as root
-          source PKGBUILD
+          source "$GITHUB_WORKSPACE/PKGBUILD"
           pacman -S --noconfirm --needed ${depends[@]} ${makedepends[@]}
 
           # `makepkg` cannot run as root. Create builder and own the workspace to it
