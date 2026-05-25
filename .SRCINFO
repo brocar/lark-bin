@@ -1,6 +1,6 @@
 pkgbase = lark-bin
 	pkgdesc = Linux client of Lark (Feishu) from Bytedance.
-	pkgver = 7.62.9
+	pkgver = 7.66.10
 	pkgrel = 1
 	url = https://www.larksuite.com/
 	install = lark-bin.install
@@ -21,9 +21,9 @@ pkgbase = lark-bin
 	conflicts = larksuite-bin
 	options = !strip
 	options = !emptydirs
-	source_x86_64 = Lark-linux_x64-7.62.9.deb::https://www.larksuite.com/api/package_info?platform=10
-	sha256sums_x86_64 = d6662c8fb30624c337f154244f7dd959ca6d70a899d5f22685f838b30785481a
-	source_aarch64 = Lark-linux_arm64-7.62.9.deb::https://www.larksuite.com/api/package_info?platform=11
-	sha256sums_aarch64 = be27cb9e2a3a08541f3f0fa076ba741edaca54036c90f076e7c1b10087e9fa64
+	source_x86_64 = Lark-linux_x64-7.66.10.deb::https://www.larksuite.com/api/package_info?platform=10
+	sha256sums_x86_64 = 0561e2e29a55550743afe8c2907eaf2289b23646744865c80f28352f80771eba
+	source_aarch64 = Lark-linux_arm64-7.66.10.deb::https://www.larksuite.com/api/package_info?platform=11
+	sha256sums_aarch64 = b28ef0fd5c4d10e319738fae79214721f4a047a325d9c33d014e8982a60bb3ab
 
 pkgname = lark-bin
