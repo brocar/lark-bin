@@ -1,7 +1,7 @@
 # Maintainer: Your Name <your.email@example.com>
 # Based on feishu-bin by Allen Zhong, Xuanwo, and Zhou Zhiqiang
 pkgname=lark-bin
-pkgver=7.66.10
+pkgver=7.66.11
 _pkgtyp=stable
 pkgrel=1
 pkgdesc="Linux client of Lark (Feishu) from Bytedance."
@@ -17,8 +17,8 @@ install=lark-bin.install
 source_x86_64=(Lark-linux_x64-${pkgver}.deb::https://www.larksuite.com/api/package_info?platform=10)
 source_aarch64=(Lark-linux_arm64-${pkgver}.deb::https://www.larksuite.com/api/package_info?platform=11)
 DLAGENTS=("https::/usr/bin/bash ${startdir}/dlagent.sh %o %u")
-sha256sums_x86_64=('0561e2e29a55550743afe8c2907eaf2289b23646744865c80f28352f80771eba')
-sha256sums_aarch64=('b28ef0fd5c4d10e319738fae79214721f4a047a325d9c33d014e8982a60bb3ab')
+sha256sums_x86_64=('e90093fde774764111d45cc3f873e86d57956f6441ba19c104cebfc1cf3ee91a')
+sha256sums_aarch64=('f6443406540e6d357dde788b907835ef97e088318a9f5b8ee6a840fc8d9ce68a')
 
 package(){
   # Extract package data
